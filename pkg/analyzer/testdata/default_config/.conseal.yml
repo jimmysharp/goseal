@@ -1,0 +1,5 @@
+packages:
+  - "example\\.com/testproject/domain.*"
+# constructors not specified - default: "^New.*"
+# ignore-files not specified - default: empty list"
+allow-same-package: false

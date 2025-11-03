@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup go
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        with:
+          go-version-file: go.mod
+
+      - name: Get golangci-lint version from Dockerfile.dev
+        id: golangci-lint-version
+        run: |
+          golangci_version=$(grep -E "GOLANGCI_LINT_VERSION=\s*" Dockerfile.dev | sed -n 's/.*GOLANGCI_LINT_VERSION=\([^"]*\)/\1/p')
+          echo "value=$golangci_version" | tee -a "${GITHUB_OUTPUT}"
+        shell: bash
+
+      - name: Lint checks
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: ${{ steps.golangci-lint-version.outputs.value }}
+
+      - name: Run tests and coverage
+        run: go test -race -coverprofile=coverage.out -covermode=atomic -coverpkg=./... ./...
