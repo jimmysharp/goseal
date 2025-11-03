@@ -2,10 +2,10 @@ package analyzer
 
 import (
 	"go/ast"
-	"go/token"
 	"go/types"
 
 	"golang.org/x/tools/go/analysis"
+	"golang.org/x/tools/go/ast/inspector"
 )
 
 type conseal struct {
@@ -29,22 +29,32 @@ func (c *conseal) run(pass *analysis.Pass) (any, error) {
 		return nil, nil
 	}
 
-	for _, file := range pass.Files {
-		filename := pass.Fset.Position(file.Pos()).Filename
-		if c.shouldIgnoreFile(filename) {
-			continue
+	inspect := inspector.New(pass.Files)
+
+	nodeFilter := []ast.Node{
+		(*ast.CompositeLit)(nil),
+		(*ast.AssignStmt)(nil),
+		(*ast.FuncDecl)(nil),
+	}
+
+	inspect.WithStack(nodeFilter, func(n ast.Node, push bool, stack []ast.Node) bool {
+		if !push {
+			return true
 		}
 
-		ast.Inspect(file, func(node ast.Node) bool {
-			switch n := node.(type) {
-			case *ast.CompositeLit:
-				c.checkCompositeLit(n, pass)
-			case *ast.AssignStmt:
-				c.checkAssignStmt(n, pass)
-			}
-			return true
-		})
-	}
+		filename := pass.Fset.Position(n.Pos()).Filename
+		if c.shouldIgnoreFile(filename) {
+			return false
+		}
+
+		switch node := n.(type) {
+		case *ast.CompositeLit:
+			c.checkCompositeLit(node, pass, stack)
+		case *ast.AssignStmt:
+			c.checkAssignStmt(node, pass, stack)
+		}
+		return true
+	})
 
 	return nil, nil
 }
@@ -79,7 +89,7 @@ func (c *conseal) shouldIgnoreFile(filename string) bool {
 	return false
 }
 
-func (c *conseal) checkCompositeLit(lit *ast.CompositeLit, pass *analysis.Pass) {
+func (c *conseal) checkCompositeLit(lit *ast.CompositeLit, pass *analysis.Pass, stack []ast.Node) {
 	tv, ok := pass.TypesInfo.Types[lit]
 	if !ok {
 		return
@@ -111,7 +121,7 @@ func (c *conseal) checkCompositeLit(lit *ast.CompositeLit, pass *analysis.Pass) 
 		return
 	}
 
-	if c.isInAllowedContext(lit.Pos(), pass, pkgPath) {
+	if c.isInAllowedContext(stack, pass, pkgPath) {
 		return
 	}
 
@@ -123,7 +133,7 @@ func (c *conseal) checkCompositeLit(lit *ast.CompositeLit, pass *analysis.Pass) 
 	)
 }
 
-func (c *conseal) checkAssignStmt(stmt *ast.AssignStmt, pass *analysis.Pass) {
+func (c *conseal) checkAssignStmt(stmt *ast.AssignStmt, pass *analysis.Pass, stack []ast.Node) {
 	for _, lhs := range stmt.Lhs {
 		selector, ok := lhs.(*ast.SelectorExpr)
 		if !ok {
@@ -161,7 +171,7 @@ func (c *conseal) checkAssignStmt(stmt *ast.AssignStmt, pass *analysis.Pass) {
 			continue
 		}
 
-		if c.isInAllowedContext(stmt.Pos(), pass, pkgPath) {
+		if c.isInAllowedContext(stack, pass, pkgPath) {
 			continue
 		}
 
@@ -176,12 +186,12 @@ func (c *conseal) checkAssignStmt(stmt *ast.AssignStmt, pass *analysis.Pass) {
 	}
 }
 
-func (c *conseal) isInAllowedContext(pos token.Pos, pass *analysis.Pass, targetPkgPath string) bool {
+func (c *conseal) isInAllowedContext(stack []ast.Node, pass *analysis.Pass, targetPkgPath string) bool {
 	if c.config.AllowSamePackage && pass.Pkg.Path() == targetPkgPath {
 		return true
 	}
 
-	enclosingFunc := c.getEnclosingFunc(pos, pass)
+	enclosingFunc := c.getEnclosingFunc(stack)
 	if enclosingFunc == nil {
 		return false
 	}
@@ -191,31 +201,11 @@ func (c *conseal) isInAllowedContext(pos token.Pos, pass *analysis.Pass, targetP
 	return c.isConstructor(funcName)
 }
 
-func (c *conseal) getEnclosingFunc(pos token.Pos, pass *analysis.Pass) *ast.FuncDecl {
-	var enclosingFunc *ast.FuncDecl
-
-	for _, file := range pass.Files {
-		ast.Inspect(file, func(n ast.Node) bool {
-			if n == nil {
-				return false
-			}
-
-			if pos < n.Pos() || pos > n.End() {
-				return false
-			}
-
-			if fn, ok := n.(*ast.FuncDecl); ok {
-				enclosingFunc = fn
-				return false
-			}
-
-			return true
-		})
-
-		if enclosingFunc != nil {
-			break
+func (c *conseal) getEnclosingFunc(stack []ast.Node) *ast.FuncDecl {
+	for i := len(stack) - 1; i >= 0; i-- {
+		if fn, ok := stack[i].(*ast.FuncDecl); ok {
+			return fn
 		}
 	}
-
-	return enclosingFunc
+	return nil
 }
