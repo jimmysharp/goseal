@@ -2,6 +2,14 @@ package app
 
 import "example.com/testproject/domain"
 
+type Wrapper struct {
+	User domain.User
+}
+
+type PointerWrapper struct {
+	User *domain.User
+}
+
 func WithConstructor() {
 	user := domain.NewUser(123, "Alice", 30)
 	_ = user
@@ -129,4 +137,26 @@ func InNestedSlice() {
 		},
 	}
 	_ = nestedUsers
+}
+
+func InStructField() {
+	wrapper := Wrapper{
+		User: domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+			ID:   1,
+			Name: "Alice",
+			Age:  30,
+		},
+	}
+	_ = wrapper
+}
+
+func InStructFieldPointer() {
+	pointerWrapper := PointerWrapper{
+		User: &domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+			ID:   1,
+			Name: "Alice",
+			Age:  30,
+		},
+	}
+	_ = pointerWrapper
 }
