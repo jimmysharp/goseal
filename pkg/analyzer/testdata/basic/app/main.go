@@ -2,45 +2,50 @@ package app
 
 import "example.com/testproject/domain"
 
-type Wrapper struct {
-	User domain.User
-}
-
-type PointerWrapper struct {
-	User *domain.User
-}
-
 func WithConstructor() {
-	user := domain.NewUser(123, "Alice", 30)
+	user, _ := domain.NewUser(123, "Alice", 30)
 	_ = user
 }
 
 func WithoutConstructor() {
-	user := domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+	_ = domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
 	}
-	_ = user
-}
+	_ = domain.User{} // want "direct construction of struct User is prohibited, use constructor function"
 
-func WithoutConstructorByPointer() {
-	user := &domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+	_ = &domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
 	}
-	_ = user
+	_ = &domain.User{} // want "direct construction of struct User is prohibited, use constructor function"
 }
 
 func DirectAssignment() {
-	user := domain.NewUser(123, "Charlie", 35)
+	user, _ := domain.NewUser(123, "Charlie", 35)
 
+	user.ID = 456      // want "direct assignment to field ID of struct User is prohibited, use constructor function"
 	user.Name = "Dave" // want "direct assignment to field Name of struct User is prohibited, use constructor function"
+	user.Age = 40      // want "direct assignment to field Age of struct User is prohibited, use constructor function"
+}
+
+type StructInSamePackage struct {
+	message string
+}
+
+func InSamePackage() {
+	_ = StructInSamePackage{
+		message: "Hello, World!",
+	}
+	_ = &StructInSamePackage{
+		message: "Hello, World!",
+	}
 }
 
 func InSlice() {
-	users := []domain.User{
+	_ = []domain.User{
 		{ // want "direct construction of struct User is prohibited, use constructor function"
 			ID:   1,
 			Name: "Alice",
@@ -52,11 +57,8 @@ func InSlice() {
 			Age:  25,
 		},
 	}
-	_ = users
-}
 
-func InSlicePointer() {
-	users := []*domain.User{
+	_ = []*domain.User{
 		{ // want "direct construction of struct User is prohibited, use constructor function"
 			ID:   1,
 			Name: "Alice",
@@ -68,11 +70,27 @@ func InSlicePointer() {
 			Age:  25,
 		},
 	}
-	_ = users
+
+	_ = [][]domain.User{
+		{
+			domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+				ID:   1,
+				Name: "Alice",
+				Age:  30,
+			},
+		},
+		{
+			{ // want "direct construction of struct User is prohibited, use constructor function"
+				ID:   2,
+				Name: "Bob",
+				Age:  25,
+			},
+		},
+	}
 }
 
 func InMap() {
-	userMap := map[int]domain.User{
+	_ = map[int]domain.User{
 		1: { // want "direct construction of struct User is prohibited, use constructor function"
 			ID:   1,
 			Name: "Alice",
@@ -84,11 +102,8 @@ func InMap() {
 			Age:  25,
 		},
 	}
-	_ = userMap
-}
 
-func InMapPointer() {
-	userMap := map[int]*domain.User{
+	_ = map[int]*domain.User{
 		1: { // want "direct construction of struct User is prohibited, use constructor function"
 			ID:   1,
 			Name: "Alice",
@@ -100,7 +115,6 @@ func InMapPointer() {
 			Age:  25,
 		},
 	}
-	_ = userMap
 }
 
 func InArray() {
@@ -119,44 +133,44 @@ func InArray() {
 	_ = users
 }
 
-func InNestedSlice() {
-	nestedUsers := [][]domain.User{
-		{
-			domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
-				ID:   1,
-				Name: "Alice",
-				Age:  30,
-			},
-		},
-		{
-			{ // want "direct construction of struct User is prohibited, use constructor function"
-				ID:   2,
-				Name: "Bob",
-				Age:  25,
-			},
-		},
-	}
-	_ = nestedUsers
+type Wrapper struct {
+	User domain.User
+}
+
+type PointerWrapper struct {
+	User *domain.User
 }
 
 func InStructField() {
-	wrapper := Wrapper{
+	_ = Wrapper{
 		User: domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
 	}
-	_ = wrapper
-}
 
-func InStructFieldPointer() {
-	pointerWrapper := PointerWrapper{
+	_ = &Wrapper{
+		User: domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+			ID:   1,
+			Name: "Alice",
+			Age:  30,
+		},
+	}
+
+	_ = PointerWrapper{
 		User: &domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
 	}
-	_ = pointerWrapper
+
+	_ = &PointerWrapper{
+		User: &domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+			ID:   1,
+			Name: "Alice",
+			Age:  30,
+		},
+	}
 }
