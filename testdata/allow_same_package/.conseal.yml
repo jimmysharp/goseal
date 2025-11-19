@@ -1,4 +1,4 @@
-packages:
+struct-packages:
   - "example\\.com/testproject/domain.*"
 constructors:
   - "^New.*"

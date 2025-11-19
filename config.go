@@ -9,15 +9,15 @@ import (
 )
 
 type Config struct {
-	Packages         []*regexp.Regexp // Regex patterns for target packages
+	StructPackages   []*regexp.Regexp // Regex patterns for packages containing target structs (if empty, all packages are targeted)
 	Constructors     []*regexp.Regexp // Regex patterns for constructor functions
 	IgnoreFiles      []*regexp.Regexp // Regex patterns for files to ignore
 	AllowSamePackage bool             // Whether to allow construction within the same package
 }
 
-func NewConfig(packages, constructors, ignoreFiles []*regexp.Regexp, allowSamePackage bool) (*Config, error) {
-	if packages == nil {
-		packages = []*regexp.Regexp{}
+func NewConfig(structPackages, constructors, ignoreFiles []*regexp.Regexp, allowSamePackage bool) (*Config, error) {
+	if structPackages == nil {
+		structPackages = []*regexp.Regexp{}
 	}
 
 	if len(constructors) == 0 {
@@ -25,7 +25,7 @@ func NewConfig(packages, constructors, ignoreFiles []*regexp.Regexp, allowSamePa
 	}
 
 	config := &Config{
-		Packages:         packages,
+		StructPackages:   structPackages,
 		Constructors:     constructors,
 		IgnoreFiles:      ignoreFiles,
 		AllowSamePackage: allowSamePackage,
@@ -35,7 +35,7 @@ func NewConfig(packages, constructors, ignoreFiles []*regexp.Regexp, allowSamePa
 }
 
 type yamlConfig struct {
-	Packages         []string `yaml:"packages"`
+	StructPackages   []string `yaml:"struct-packages"`
 	Constructors     []string `yaml:"constructors"`
 	IgnoreFiles      []string `yaml:"ignore-files"`
 	AllowSamePackage bool     `yaml:"allow-same-package"`
@@ -63,17 +63,17 @@ func ParseConfig(path string) (*Config, error) {
 }
 
 func (y *yamlConfig) compile() (*Config, error) {
-	var packages []*regexp.Regexp
+	var structPackages []*regexp.Regexp
 	var constructors []*regexp.Regexp
 	var ignoreFiles []*regexp.Regexp
 
-	// packages
-	for _, pattern := range y.Packages {
+	// struct-packages
+	for _, pattern := range y.StructPackages {
 		re, err := regexp.Compile(pattern)
 		if err != nil {
-			return nil, fmt.Errorf("invalid packages pattern '%s': %w", pattern, err)
+			return nil, fmt.Errorf("invalid struct-packages pattern '%s': %w", pattern, err)
 		}
-		packages = append(packages, re)
+		structPackages = append(structPackages, re)
 	}
 
 	// constroctors
@@ -94,5 +94,5 @@ func (y *yamlConfig) compile() (*Config, error) {
 		ignoreFiles = append(ignoreFiles, re)
 	}
 
-	return NewConfig(packages, constructors, ignoreFiles, y.AllowSamePackage)
+	return NewConfig(structPackages, constructors, ignoreFiles, y.AllowSamePackage)
 }

@@ -1,5 +1,4 @@
-packages:
-  - "example\\.com/testproject/domain.*"
+# struct-packages not specified - all packages are targeted
 # constructors not specified - default: "^New.*"
-# ignore-files not specified - default: empty list"
-allow-same-package: false
+# ignore-files not specified - default: empty list
+# allow-same-package not specified - default: false

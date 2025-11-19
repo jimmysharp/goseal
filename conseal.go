@@ -3,6 +3,7 @@ package conseal
 import (
 	"go/ast"
 	"go/types"
+	"strings"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/ast/inspector"
@@ -25,11 +26,20 @@ func NewAnalyzer(config *Config) *analysis.Analyzer {
 }
 
 func (c *conseal) run(pass *analysis.Pass) (any, error) {
-	if len(c.config.Packages) == 0 {
+	// Filter out generated files
+	var userFiles []*ast.File
+	for _, f := range pass.Files {
+		if !isGeneratedFile(f) {
+			userFiles = append(userFiles, f)
+		}
+	}
+
+	// If all files are generated, skip this package
+	if len(userFiles) == 0 {
 		return nil, nil
 	}
 
-	inspect := inspector.New(pass.Files)
+	inspect := inspector.New(userFiles)
 
 	nodeFilter := []ast.Node{
 		(*ast.CompositeLit)(nil),
@@ -60,10 +70,12 @@ func (c *conseal) run(pass *analysis.Pass) (any, error) {
 }
 
 func (c *conseal) isTargetPackage(pkgPath string) bool {
-	if len(c.config.Packages) == 0 {
-		return false
+	// If no struct-packages are specified, target all packages
+	if len(c.config.StructPackages) == 0 {
+		return true
 	}
-	for _, pattern := range c.config.Packages {
+	// If struct-packages are specified, only target matching packages
+	for _, pattern := range c.config.StructPackages {
 		if pattern.MatchString(pkgPath) {
 			return true
 		}
@@ -84,6 +96,18 @@ func (c *conseal) shouldIgnoreFile(filename string) bool {
 	for _, pattern := range c.config.IgnoreFiles {
 		if pattern.MatchString(filename) {
 			return true
+		}
+	}
+	return false
+}
+
+func isGeneratedFile(file *ast.File) bool {
+	for _, commentGroup := range file.Comments {
+		for _, comment := range commentGroup.List {
+			text := comment.Text
+			if strings.Contains(text, "Code generated") && strings.Contains(text, "DO NOT EDIT") {
+				return true
+			}
 		}
 	}
 	return false
