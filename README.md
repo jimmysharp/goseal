@@ -12,7 +12,7 @@ go install github.com/jimmysharp/conseal/cmd/conseal@latest
 
 Create `.conseal.yml` in your project root:
 
-**Note:** While `struct-packages` is optional (omitting it will target all packages), it is **strongly recommended** to explicitly specify the packages containing your domain structs. This prevents false positives in third-party or standard library code.
+**Note:** While `struct-packages` is optional (omitting it will target all packages), it is **strongly recommended** to explicitly specify the packages containing your domain structs. This prevents false positives with structs in third-party or standard library code.
 
 ```yaml
 # List of regexps for packages containing target structs
