@@ -17,10 +17,10 @@ func TestAnalyzer(t *testing.T) {
 			name: "basic",
 		},
 		{
-			name: "default_config",
+			name: "config_default",
 		},
 		{
-			name: "allow_same_package",
+			name: "config_allow_same_package",
 		},
 		{
 			name: "unsupported",
