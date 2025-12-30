@@ -1,4 +1,4 @@
-package conseal
+package goseal
 
 import (
 	"fmt"
@@ -109,7 +109,7 @@ type yamlConfig struct {
 
 func ParseConfig(path string) (*Config, error) {
 	if path == "" {
-		path = ".conseal.yml"
+		path = ".goseal.yml"
 	}
 
 	data, err := os.ReadFile(path)

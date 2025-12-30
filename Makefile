@@ -1,7 +1,7 @@
-BINARY_NAME=conseal
+BINARY_NAME=goseal
 
 build:
-	CGO_ENABLED=0 go build -ldflags '-w -s' -trimpath -o $(BINARY_NAME) cmd/conseal/main.go
+	CGO_ENABLED=0 go build -ldflags '-w -s' -trimpath -o $(BINARY_NAME) cmd/goseal/main.go
 
 test:
 	go test -race ./...

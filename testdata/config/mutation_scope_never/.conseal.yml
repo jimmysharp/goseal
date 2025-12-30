@@ -1,8 +1,0 @@
-target-packages:
-  - "example\\.com/testproject/domain.*"
-factory-names:
-  - "^New.*"
-init-scope: same-package
-mutation-scope: never
-ignore-files:
-  - "_test\\.go$"

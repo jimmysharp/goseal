@@ -1,0 +1,5 @@
+# target-packages not specified - all packages are targeted
+# factory-names not specified - all function names are allowed
+# init-scope not specified - default: same-package
+# mutation-scope not specified - default: receiver
+# ignore-files not specified - default: empty list

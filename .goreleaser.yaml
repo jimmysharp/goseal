@@ -2,14 +2,14 @@
 
 version: 2
 
-project_name: conseal
+project_name: goseal
 
 before:
   hooks:
     - go mod tidy
 
 builds:
-  - main: ./cmd/conseal
+  - main: ./cmd/goseal
     env:
       - CGO_ENABLED=0
     goos:

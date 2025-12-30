@@ -1,4 +1,4 @@
-module github.com/jimmysharp/conseal
+module github.com/jimmysharp/goseal
 
 go 1.25.5
 
