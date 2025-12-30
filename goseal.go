@@ -268,6 +268,9 @@ func (c *goseal) isMutationAllowedByScope(currentPkg, structPkg string, stack []
 	case MutationScopeAny:
 		return true
 
+	case MutationScopeInTargetPackages:
+		return c.isTargetPackage(currentPkg)
+
 	case MutationScopeReceiver:
 		return c.isInReceiverMethod(stack)
 

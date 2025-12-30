@@ -44,6 +44,7 @@ init-scope: same-package
 
 # Scope for field mutation
 # - any: Allow field mutation everywhere
+# - in-target-packages: Allow field mutation from packages in target-packages
 # - receiver: Allow field mutation only in receiver methods
 # - same-package: Allow field mutation within the same package
 # - never: Never allow field mutation
