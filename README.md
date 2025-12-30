@@ -1,16 +1,16 @@
-# conseal
+# goseal
 
-`conseal` is a linter that checks direct instantiation of Go structs and enforces creation through constructor functions. Use it to prevent invalid values from leaking into your objects, such as when applying the Value Object pattern.
+`goseal` is a linter that checks direct initialization of Go structs and enforces creation through factory functions. It "seals" your structs, ensuring they can only be instantiated through approved factory functions. Use it to prevent invalid values from leaking into your objects, such as when applying the Value Object pattern.
 
 ## Installation
 
 ```bash
-go install github.com/jimmysharp/conseal/cmd/conseal@latest
+go install github.com/jimmysharp/goseal/cmd/goseal@latest
 ```
 
 ## Configuration
 
-Create `.conseal.yml` in your project root:
+Create `.goseal.yml` in your project root:
 
 **Note:** While `target-packages` is optional (omitting it will target all packages), it is **strongly recommended** to explicitly specify the packages containing your domain structs. This prevents false positives with structs in third-party or standard library code.
 
@@ -60,7 +60,7 @@ ignore-files:
 ## Usage
 
 ```bash
-conseal ./...
+goseal ./...
 ```
 
 ## Examples
@@ -76,7 +76,7 @@ type User struct {
 }
 
 func NewUser(id, name string) *User {
-    // ✅ Allowed inside a constructor
+    // ✅ Allowed inside a factory function
     return &User{
         ID:   id,
         Name: name,
@@ -116,7 +116,7 @@ package app
 import "github.com/yourorg/domain"
 
 func CreateUser() {
-    // ✅ Use the constructor
+    // ✅ Use the factory function
     user := domain.NewUser("123", "Alice")
     
     // ✅ Use the method for mutation

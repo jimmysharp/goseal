@@ -1,0 +1,4 @@
+target-packages:
+  - "example\\.com/testproject/domain.*"
+init-scope: same-package
+mutation-scope: same-package

@@ -4,8 +4,8 @@ import (
 	"example.com/testproject/domain/user"
 )
 
-// SHOULD NOT REPORT: Using constructor function
-func WithConstructor() {
+// SHOULD NOT REPORT: Using factory function
+func WithFactoryFunction() {
 	u, _ := user.NewUser(123, "Alice", 30)
 	_ = u
 }

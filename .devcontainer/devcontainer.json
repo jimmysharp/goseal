@@ -1,10 +1,10 @@
 {
-  "name": "conseal",
+  "name": "goseal",
   "dockerComposeFile": [
     "../compose.yml",
     "compose.devcontainer.yml"
   ],
-  "service": "conseal",
+  "service": "goseal",
   "workspaceFolder": "/workspace",
   "customizations": {
     "vscode": {

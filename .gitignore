@@ -2,5 +2,5 @@
 *.out
 
 # binary
-/conseal
+/goseal
 dist/
