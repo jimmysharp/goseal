@@ -31,9 +31,14 @@ jobs:
         shell: bash
 
       - name: Lint checks
-        uses: golangci/golangci-lint-action@v9
+        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
         with:
           version: ${{ steps.golangci-lint-version.outputs.value }}
 
       - name: Run tests and coverage
-        run: go test -race -coverprofile=coverage.out -covermode=atomic -coverpkg=./... ./...
+        run: make test
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
