@@ -8,7 +8,6 @@ type User struct {
 	Age  int
 }
 
-// SHOULD NOT REPORT: Function matching "^New.*" is considered a factory (factory-names)
 func NewUser(id int, name string, age int) (*User, error) {
 	if id <= 0 {
 		return nil, fmt.Errorf("id must be positive: %d", id)
@@ -27,11 +26,16 @@ func NewUser(id int, name string, age int) (*User, error) {
 	}, nil
 }
 
-// SHOULD NOT REPORT: Assignment in receiver is allowed (mutation-scope: receiver)
+// SHOULD REPORT: Mutation is always prohibited (mutation-scope: never)
 func (u *User) UpdateName(name string) error {
 	if name == "" {
 		return fmt.Errorf("name must not be empty")
 	}
-	u.Name = name
+	u.Name = name // want "direct assignment to field Name of struct User is prohibited outside allowed scope"
 	return nil
+}
+
+// SHOULD REPORT: Mutation is always prohibited (mutation-scope: never)
+func UpdateUserAge(u *User, age int) {
+	u.Age = age // want "direct assignment to field Age of struct User is prohibited outside allowed scope"
 }

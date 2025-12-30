@@ -1,15 +1,13 @@
-package domain
+package other
 
-import "fmt"
+import (
+	"fmt"
 
-type User struct {
-	ID   int
-	Name string
-	Age  int
-}
+	"example.com/testproject/domain/user"
+)
 
-// SHOULD NOT REPORT: Initialization in function matching factory pattern (factory-names)
-func NewUser(id int, name string, age int) (*User, error) {
+// SHOULD NOT REPORT: Initialization in target packages is allowed (init-scope: in-target-packages)
+func NewUser(id int, name string, age int) (*user.User, error) {
 	if id <= 0 {
 		return nil, fmt.Errorf("id must be positive: %d", id)
 	}
@@ -20,7 +18,7 @@ func NewUser(id int, name string, age int) (*User, error) {
 		return nil, fmt.Errorf("age must be non-negative: %d", age)
 	}
 
-	return &User{
+	return &user.User{
 		ID:   id,
 		Name: name,
 		Age:  age,

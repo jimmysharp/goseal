@@ -1,0 +1,8 @@
+# target-packages not specified - all packages are targeted
+factory-names:
+  - "^New.*"
+  - "^Create.*"
+init-scope: any
+mutation-scope: receiver
+ignore-files:
+  - "_test\\.go$"

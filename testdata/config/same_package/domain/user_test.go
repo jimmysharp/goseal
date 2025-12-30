@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// SHOULD REPORT: No ignore-files configured, so test files are also checked (ignore-files)
+// SHOULD NOT REPORT: Initialization in same package is allowed (init-scope: same-package)
 func TestNewUser_Success(t *testing.T) {
 	type args struct {
 		id   int
@@ -20,12 +20,12 @@ func TestNewUser_Success(t *testing.T) {
 	}{
 		{
 			name: "normal case",
-			args: args{ // want "direct construction of struct args is prohibited, use constructor function"
+			args: args{
 				id:   1,
 				name: "Alice",
 				age:  28,
 			},
-			want: &User{ // want "direct construction of struct User is prohibited, use constructor function"
+			want: &User{
 				ID:   1,
 				Name: "Alice",
 				Age:  28,
@@ -47,7 +47,7 @@ func TestNewUser_Success(t *testing.T) {
 	}
 }
 
-// SHOULD REPORT: No ignore-files configured, so test files are also checked (ignore-files)
+// SHOULD NOT REPORT: Initialization in same package is allowed (init-scope: same-package)
 func TestNewUser_Error(t *testing.T) {
 	type args struct {
 		id   int
@@ -61,7 +61,7 @@ func TestNewUser_Error(t *testing.T) {
 	}{
 		{
 			name: "id is zero",
-			args: args{ // want "direct construction of struct args is prohibited, use constructor function"
+			args: args{
 				id:   0,
 				name: "Alice",
 				age:  30,
@@ -69,7 +69,7 @@ func TestNewUser_Error(t *testing.T) {
 		},
 		{
 			name: "name is empty",
-			args: args{ // want "direct construction of struct args is prohibited, use constructor function"
+			args: args{
 				id:   1,
 				name: "",
 				age:  30,
@@ -77,7 +77,7 @@ func TestNewUser_Error(t *testing.T) {
 		},
 		{
 			name: "age is negative",
-			args: args{ // want "direct construction of struct args is prohibited, use constructor function"
+			args: args{
 				id:   1,
 				name: "Alice",
 				age:  -1,
