@@ -2,8 +2,8 @@ package app
 
 import "example.com/testproject/domain"
 
-// SHOULD NOT REPORT: Using constructor function matching factory-names
-func WithConstructor() {
+// SHOULD NOT REPORT: Using factory function matching factory-names
+func WithFactoryFunction() {
 	user, _ := domain.NewUser(123, "Alice", 30)
 	_ = user
 
@@ -12,7 +12,7 @@ func WithConstructor() {
 }
 
 // SHOULD REPORT: Initialization outside factory function
-func WithoutConstructor() {
+func WithoutFactoryFunction() {
 	_ = domain.User{ // want "direct construction of struct User is prohibited, use allowed factory function"
 		ID:   123,
 		Name: "Bob",

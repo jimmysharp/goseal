@@ -76,7 +76,7 @@ type User struct {
 }
 
 func NewUser(id, name string) *User {
-    // ✅ Allowed inside a constructor
+    // ✅ Allowed inside a factory function
     return &User{
         ID:   id,
         Name: name,
@@ -116,7 +116,7 @@ package app
 import "github.com/yourorg/domain"
 
 func CreateUser() {
-    // ✅ Use the constructor
+    // ✅ Use the factory function
     user := domain.NewUser("123", "Alice")
     
     // ✅ Use the method for mutation

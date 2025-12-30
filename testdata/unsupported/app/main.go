@@ -2,15 +2,15 @@ package app
 
 import "example.com/testproject/domain"
 
-// NOT SUPPORTED: Zero value declarations are not supported to avoid false positives (see WithZeroValueAndConstructor)
+// NOT SUPPORTED: Zero value declarations are not supported to avoid false positives (see WithZeroValueAndFactoryFunction)
 func WithZeroValue() {
 	var _ domain.User
 	var _ *domain.User
 }
 
-// NOT SUPPORTED: Valid pattern - zero value with conditional constructor
+// NOT SUPPORTED: Valid pattern - zero value with conditional factory function
 // (would be false positive if zero value detection was enabled)
-func WithZeroValueAndConstructor(isMale bool) {
+func WithZeroValueAndFactoryFunction(isMale bool) {
 	var user *domain.User
 	if isMale {
 		user, _ = domain.NewUser(1, "Alice", 30)

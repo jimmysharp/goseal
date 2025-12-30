@@ -2,14 +2,14 @@ package app
 
 import "example.com/testproject/domain"
 
-// SHOULD NOT REPORT: Using constructor function
-func WithConstructor() {
+// SHOULD NOT REPORT: Using factory function
+func WithFactoryFunction() {
 	user, _ := domain.NewUser(123, "Alice", 30)
 	_ = user
 }
 
-// SHOULD REPORT: Direct initialization without constructor
-func WithoutConstructor() {
+// SHOULD REPORT: Direct initialization without factory function
+func WithoutFactoryFunction() {
 	_ = domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
 		ID:   123,
 		Name: "Bob",
