@@ -1,5 +1,7 @@
 target-packages:
   - "example\\.com/testproject/domain.*"
+exclude-structs:
+  - ".*DTO$"
 factory-names:
   - "^New.*"
 init-scope: same-package

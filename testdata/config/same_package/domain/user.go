@@ -8,7 +8,7 @@ type User struct {
 	Age  int
 }
 
-// SHOULD NOT REPORT: "^New.*" is default constructor pattern (struct-packages)
+// SHOULD NOT REPORT: Initialization in same package is allowed (init-scope: same-package)
 func NewUser(id int, name string, age int) (*User, error) {
 	if id <= 0 {
 		return nil, fmt.Errorf("id must be positive: %d", id)
@@ -25,4 +25,13 @@ func NewUser(id int, name string, age int) (*User, error) {
 		Name: name,
 		Age:  age,
 	}, nil
+}
+
+// SHOULD NOT REPORT: Initialization in same package is allowed (init-scope: same-package)
+func (u *User) UpdateName(name string) error {
+	if name == "" {
+		return fmt.Errorf("name must not be empty")
+	}
+	u.Name = name
+	return nil
 }

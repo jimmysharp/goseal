@@ -1,7 +1,8 @@
-struct-packages:
+target-packages:
   - "example\\.com/testproject/domain.*"
-constructors:
+factory-names:
   - "^New.*"
+init-scope: same-package
+mutation-scope: receiver
 ignore-files:
   - "_test\\.go$"
-allow-same-package: false

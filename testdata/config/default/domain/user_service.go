@@ -7,9 +7,9 @@ func CreateUser(name string, age int) (*User, error) {
 	return NewUser(rand.Int(), name, age)
 }
 
-// SHOULD REPORT: Direct initialization in non-factory function (factory-names)
+// SHOULD NOT REPORT: Initialization in same package is allowed (init-scope: same-package)
 func CreateUserDirect(name string, age int) *User {
-	return &User{ // want "direct construction of struct User is prohibited, use allowed factory function"
+	return &User{
 		ID:   rand.Int(),
 		Name: name,
 		Age:  age,
@@ -17,7 +17,9 @@ func CreateUserDirect(name string, age int) *User {
 }
 
 // SHOULD REPORT: Direct Assignment in non-receiver function (mutation-scope: receiver)
-func UpdateUserWithoutReceiver(u *User, name string, age int) {
+func UpdateUserWithoutReceiver(u *User, name string, age int) *User {
 	u.Name = name // want "direct assignment to field Name of struct User is prohibited outside allowed scope"
 	u.Age = age   // want "direct assignment to field Age of struct User is prohibited outside allowed scope"
+
+	return u
 }

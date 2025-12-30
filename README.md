@@ -12,27 +12,49 @@ go install github.com/jimmysharp/conseal/cmd/conseal@latest
 
 Create `.conseal.yml` in your project root:
 
-**Note:** While `struct-packages` is optional (omitting it will target all packages), it is **strongly recommended** to explicitly specify the packages containing your domain structs. This prevents false positives with structs in third-party or standard library code.
+**Note:** While `target-packages` is optional (omitting it will target all packages), it is **strongly recommended** to explicitly specify the packages containing your domain structs. This prevents false positives with structs in third-party or standard library code.
 
 ```yaml
-# List of regexps for packages containing target structs
+# List of regexps for packages containing target structs to protect
 # If not specified or empty, all packages are targeted
-# If specified, only structs in matching packages are targeted
-struct-packages:
+# Default: []
+target-packages:
   - "github\\.com/yourorg/domain/.*"
   - "github\\.com/yourorg/model/.*"
 
-# List of regexps for functions considered as constructors
-constructors:
+# List of regexps for struct names to exclude from protection
+# Even if in target-packages, these structs won't be protected
+# Default: []
+exclude-structs:
+  - "^Config$"
+  - "DTO$"
+
+# List of regexps for functions considered as factory functions
+# If empty, all function names are allowed
+# Default: []
+factory-names:
   - "^New.*"
 
+# Scope for struct initialization
+# - any: Allow initialization from all packages
+# - in-target-packages: Allow initialization from packages in target-packages
+# - same-package: Allow initialization only within the same package
+# Default: same-package
+init-scope: same-package
+
+# Scope for field mutation
+# - any: Allow field mutation everywhere
+# - receiver: Allow field mutation only in receiver methods
+# - same-package: Allow field mutation within the same package
+# - never: Never allow field mutation
+# Default: receiver
+mutation-scope: receiver
+
 # List of regexps for files to ignore
+# Default: []
 ignore-files:
   - "_test\\.go$"
   - "mock_.*\\.go$"
-
-# Whether to allow direct struct construction within the same package
-allow-same-package: false
 ```
 
 ## Usage
@@ -60,6 +82,11 @@ func NewUser(id, name string) *User {
         Name: name,
     }
 }
+
+// ✅ Allowed: mutation in receiver method (when mutation-scope: receiver)
+func (u *User) UpdateName(name string) {
+    u.Name = name
+}
 ```
 
 ### Example that gets flagged (NG)
@@ -70,13 +97,13 @@ package app
 import "github.com/yourorg/domain"
 
 func CreateUser() {
-    // ❌ Direct use of a struct literal
+    // ❌ Direct use of a struct literal (when init-scope: same-package)
     user := domain.User{
         ID:   "123",
         Name: "Alice",
     }
     
-    // ❌ Direct field assignment
+    // ❌ Direct field assignment (when mutation-scope: receiver)
     user.Name = "Bob"
 }
 ```
@@ -91,8 +118,78 @@ import "github.com/yourorg/domain"
 func CreateUser() {
     // ✅ Use the constructor
     user := domain.NewUser("123", "Alice")
-    _ = user
+    
+    // ✅ Use the method for mutation
+    user.UpdateName("Bob")
 }
+```
+
+## Usecases
+
+### Strict constructor usage with immutability
+
+Force constructor usage in domain packages and prohibit all mutations:
+
+```yaml
+target-packages:
+  - "github\\.com/yourorg/domain/.*"
+factory-names:
+  - "^New.*"
+init-scope: same-package
+mutation-scope: never
+```
+
+### Entity Pattern
+
+Allow mutation through methods while preventing direct field access:
+
+```yaml
+target-packages:
+  - "github\\.com/yourorg/domain/entity/.*"
+factory-names:
+  - "^New.*"
+init-scope: same-package
+mutation-scope: receiver
+```
+
+### Domain packages with subpackages
+
+Allow cross-package initialization within domain packages (useful when domain is split into subpackages like `domain/user`, `domain/order`, etc.):
+
+```yaml
+target-packages:
+  - "github\\.com/yourorg/domain/.*"
+factory-names:
+  - "^New.*"
+init-scope: in-target-packages
+mutation-scope: never
+```
+
+### Trust package boundaries
+
+Allow free operations within domain packages:
+
+```yaml
+target-packages:
+  - "github\\.com/yourorg/domain/.*"
+init-scope: same-package
+mutation-scope: same-package
+```
+
+### Exclude specific structs
+
+Exclude specific structs (e.g., configuration structs, DTOs) from protection:
+
+```yaml
+target-packages:
+  - "github\\.com/yourorg/domain/.*"
+exclude-structs:
+  - "^Config$"
+  - "DTO$"
+factory-names:
+  - "^New.*"
+init-scope: same-package
+mutation-scope: receiver
 ```
 
 ## License

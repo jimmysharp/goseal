@@ -70,12 +70,12 @@ func (c *conseal) run(pass *analysis.Pass) (any, error) {
 }
 
 func (c *conseal) isTargetPackage(pkgPath string) bool {
-	// If no struct-packages are specified, target all packages
-	if len(c.config.StructPackages) == 0 {
+	// If no target-packages are specified, target all packages
+	if len(c.config.TargetPackages) == 0 {
 		return true
 	}
-	// If struct-packages are specified, only target matching packages
-	for _, pattern := range c.config.StructPackages {
+	// If target-packages are specified, only target matching packages
+	for _, pattern := range c.config.TargetPackages {
 		if pattern.MatchString(pkgPath) {
 			return true
 		}
@@ -83,9 +83,9 @@ func (c *conseal) isTargetPackage(pkgPath string) bool {
 	return false
 }
 
-func (c *conseal) isConstructor(funcName string) bool {
-	for _, pattern := range c.config.Constructors {
-		if pattern.MatchString(funcName) {
+func (c *conseal) isExcludedStruct(structName string) bool {
+	for _, pattern := range c.config.ExcludeStructs {
+		if pattern.MatchString(structName) {
 			return true
 		}
 	}
@@ -145,16 +145,29 @@ func (c *conseal) checkCompositeLit(lit *ast.CompositeLit, pass *analysis.Pass, 
 		return
 	}
 
-	if c.isInAllowedContext(stack, pass, pkgPath) {
+	structName := named.Obj().Name()
+
+	if c.isExcludedStruct(structName) {
 		return
 	}
 
-	structName := named.Obj().Name()
-	pass.Reportf(
-		lit.Pos(),
-		"direct construction of struct %s is prohibited, use constructor function",
-		structName,
-	)
+	if !c.isInitAllowedByScope(pass.Pkg.Path(), pkgPath) {
+		pass.Reportf(
+			lit.Pos(),
+			"direct construction of struct %s is prohibited outside allowed scope",
+			structName,
+		)
+		return
+	}
+
+	if !c.isInAllowedFactory(stack) {
+		pass.Reportf(
+			lit.Pos(),
+			"direct construction of struct %s is prohibited, use allowed factory function",
+			structName,
+		)
+		return
+	}
 }
 
 func (c *conseal) checkAssignStmt(stmt *ast.AssignStmt, pass *analysis.Pass, stack []ast.Node) {
@@ -195,23 +208,27 @@ func (c *conseal) checkAssignStmt(stmt *ast.AssignStmt, pass *analysis.Pass, sta
 			continue
 		}
 
-		if c.isInAllowedContext(stack, pass, pkgPath) {
+		structName := named.Obj().Name()
+
+		if c.isExcludedStruct(structName) {
 			continue
 		}
 
-		structName := named.Obj().Name()
-		fieldName := selector.Sel.Name
-		pass.Reportf(
-			stmt.Pos(),
-			"direct assignment to field %s of struct %s is prohibited, use constructor function",
-			fieldName,
-			structName,
-		)
+		if !c.isMutationAllowedByScope(pass.Pkg.Path(), pkgPath, stack) {
+			fieldName := selector.Sel.Name
+			pass.Reportf(
+				stmt.Pos(),
+				"direct assignment to field %s of struct %s is prohibited outside allowed scope",
+				fieldName,
+				structName,
+			)
+		}
 	}
 }
 
-func (c *conseal) isInAllowedContext(stack []ast.Node, pass *analysis.Pass, targetPkgPath string) bool {
-	if c.config.AllowSamePackage && pass.Pkg.Path() == targetPkgPath {
+func (c *conseal) isInAllowedFactory(stack []ast.Node) bool {
+	// If factory-names is empty, allow all function names
+	if len(c.config.FactoryNames) == 0 {
 		return true
 	}
 
@@ -222,7 +239,60 @@ func (c *conseal) isInAllowedContext(stack []ast.Node, pass *analysis.Pass, targ
 
 	funcName := enclosingFunc.Name.Name
 
-	return c.isConstructor(funcName)
+	for _, pattern := range c.config.FactoryNames {
+		if pattern.MatchString(funcName) {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *conseal) isInitAllowedByScope(currentPkg, structPkg string) bool {
+	switch c.config.InitScope {
+	case InitScopeAny:
+		return true
+
+	case InitScopeInTargetPackages:
+		return c.isTargetPackage(currentPkg)
+
+	case InitScopeSamePackage:
+		return currentPkg == structPkg
+
+	default:
+		return false
+	}
+}
+
+func (c *conseal) isMutationAllowedByScope(currentPkg, structPkg string, stack []ast.Node) bool {
+	switch c.config.MutationScope {
+	case MutationScopeAny:
+		return true
+
+	case MutationScopeReceiver:
+		return c.isInReceiverMethod(stack)
+
+	case MutationScopeSamePackage:
+		return currentPkg == structPkg
+
+	case MutationScopeNever:
+		return false
+
+	default:
+		return false
+	}
+}
+
+func (c *conseal) isInReceiverMethod(stack []ast.Node) bool {
+	enclosingFunc := c.getEnclosingFunc(stack)
+	if enclosingFunc == nil {
+		return false
+	}
+
+	if enclosingFunc.Recv == nil || len(enclosingFunc.Recv.List) == 0 {
+		return false
+	}
+
+	return true
 }
 
 func (c *conseal) getEnclosingFunc(stack []ast.Node) *ast.FuncDecl {

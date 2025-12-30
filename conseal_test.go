@@ -17,10 +17,25 @@ func TestAnalyzer(t *testing.T) {
 			name: "basic",
 		},
 		{
-			name: "config_default",
+			name: "config/default",
 		},
 		{
-			name: "config_allow_same_package",
+			name: "config/same_package",
+		},
+		{
+			name: "config/in_target_packages",
+		},
+		{
+			name: "config/only_factory_names",
+		},
+		{
+			name: "config/mutation_scope_any",
+		},
+		{
+			name: "config/mutation_scope_never",
+		},
+		{
+			name: "config/exclude_structs",
 		},
 		{
 			name: "unsupported",

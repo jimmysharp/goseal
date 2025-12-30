@@ -7,8 +7,17 @@ func CreateUser(name string, age int) (*User, error) {
 	return NewUser(rand.Int(), name, age)
 }
 
-// SHOULD REPORT: Direct initialization in non-factory function (factory-names)
-func CreateUserDirect(name string, age int) *User {
+// SHOULD NOT REPORT: Function matching "^Create.*" is considered a factory (factory-names)
+func CreateDefaultUser() *User {
+	return &User{
+		ID:   rand.Int(),
+		Name: "Default",
+		Age:  0,
+	}
+}
+
+// SHOULD REPORT: Initialization in non-factory function (factory-names)
+func BuildUser(name string, age int) *User {
 	return &User{ // want "direct construction of struct User is prohibited, use allowed factory function"
 		ID:   rand.Int(),
 		Name: name,

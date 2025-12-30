@@ -10,7 +10,7 @@ func WithConstructor() {
 
 // SHOULD REPORT: Direct initialization without constructor
 func WithoutConstructor() {
-	user := domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+	user := domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
@@ -20,7 +20,7 @@ func WithoutConstructor() {
 
 // SHOULD REPORT: Direct initialization with pointer
 func WithoutConstructorByPointer() {
-	user := &domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+	user := &domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
@@ -28,9 +28,16 @@ func WithoutConstructorByPointer() {
 	_ = user
 }
 
+// SHOULD NOT REPORT: Assignment through method
+func AssignmentInReceiver() {
+	user, _ := domain.NewUser(123, "Charlie", 35)
+
+	user.UpdateName("Dave")
+}
+
 // SHOULD REPORT: Direct field assignment
 func DirectAssignment() {
 	user, _ := domain.NewUser(123, "Charlie", 35)
 
-	user.Name = "Dave" // want "direct assignment to field Name of struct User is prohibited, use constructor function"
+	user.Name = "Dave" // want "direct assignment to field Name of struct User is prohibited outside allowed scope"
 }

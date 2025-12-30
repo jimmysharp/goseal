@@ -1,5 +1,0 @@
-struct-packages:
-  - "example\\.com/testproject/domain.*"
-constructors:
-  - "^New.*"
-allow-same-package: true

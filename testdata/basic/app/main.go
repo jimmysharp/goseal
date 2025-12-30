@@ -10,28 +10,35 @@ func WithConstructor() {
 
 // SHOULD REPORT: Direct initialization without constructor
 func WithoutConstructor() {
-	_ = domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+	_ = domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
 	}
-	_ = domain.User{} // want "direct construction of struct User is prohibited, use constructor function"
+	_ = domain.User{} // want "direct construction of struct User is prohibited outside allowed scope"
 
-	_ = &domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+	_ = &domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
 	}
-	_ = &domain.User{} // want "direct construction of struct User is prohibited, use constructor function"
+	_ = &domain.User{} // want "direct construction of struct User is prohibited outside allowed scope"
+}
+
+// SHOULD NOT REPORT: Assignment through method
+func AssignmentInReceiver() {
+	user, _ := domain.NewUser(123, "Charlie", 35)
+
+	user.UpdateName("Dave")
 }
 
 // SHOULD REPORT: Direct field assignment
 func DirectAssignment() {
 	user, _ := domain.NewUser(123, "Charlie", 35)
 
-	user.ID = 456      // want "direct assignment to field ID of struct User is prohibited, use constructor function"
-	user.Name = "Dave" // want "direct assignment to field Name of struct User is prohibited, use constructor function"
-	user.Age = 40      // want "direct assignment to field Age of struct User is prohibited, use constructor function"
+	user.ID = 456      // want "direct assignment to field ID of struct User is prohibited outside allowed scope"
+	user.Name = "Dave" // want "direct assignment to field Name of struct User is prohibited outside allowed scope"
+	user.Age = 40      // want "direct assignment to field Age of struct User is prohibited outside allowed scope"
 }
 
 type StructInSamePackage struct {
@@ -51,12 +58,12 @@ func InSamePackage() {
 // SHOULD REPORT: Direct initialization in slice
 func InSlice() {
 	_ = []domain.User{
-		{ // want "direct construction of struct User is prohibited, use constructor function"
+		{ // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
-		{ // want "direct construction of struct User is prohibited, use constructor function"
+		{ // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   2,
 			Name: "Bob",
 			Age:  25,
@@ -64,12 +71,12 @@ func InSlice() {
 	}
 
 	_ = []*domain.User{
-		{ // want "direct construction of struct User is prohibited, use constructor function"
+		{ // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
-		{ // want "direct construction of struct User is prohibited, use constructor function"
+		{ // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   2,
 			Name: "Bob",
 			Age:  25,
@@ -78,14 +85,14 @@ func InSlice() {
 
 	_ = [][]domain.User{
 		{
-			domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+			domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
 				ID:   1,
 				Name: "Alice",
 				Age:  30,
 			},
 		},
 		{
-			{ // want "direct construction of struct User is prohibited, use constructor function"
+			{ // want "direct construction of struct User is prohibited outside allowed scope"
 				ID:   2,
 				Name: "Bob",
 				Age:  25,
@@ -97,12 +104,12 @@ func InSlice() {
 // SHOULD REPORT: Direct initialization in map
 func InMap() {
 	_ = map[int]domain.User{
-		1: { // want "direct construction of struct User is prohibited, use constructor function"
+		1: { // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
-		2: { // want "direct construction of struct User is prohibited, use constructor function"
+		2: { // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   2,
 			Name: "Bob",
 			Age:  25,
@@ -110,12 +117,12 @@ func InMap() {
 	}
 
 	_ = map[int]*domain.User{
-		1: { // want "direct construction of struct User is prohibited, use constructor function"
+		1: { // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
-		2: { // want "direct construction of struct User is prohibited, use constructor function"
+		2: { // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   2,
 			Name: "Bob",
 			Age:  25,
@@ -126,12 +133,12 @@ func InMap() {
 // SHOULD REPORT: Direct initialization in array
 func InArray() {
 	users := [2]domain.User{
-		{ // want "direct construction of struct User is prohibited, use constructor function"
+		{ // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
-		{ // want "direct construction of struct User is prohibited, use constructor function"
+		{ // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   2,
 			Name: "Bob",
 			Age:  25,
@@ -151,7 +158,7 @@ type PointerWrapper struct {
 // SHOULD REPORT: Direct initialization in struct field
 func InStructField() {
 	_ = Wrapper{
-		User: domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+		User: domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
@@ -159,7 +166,7 @@ func InStructField() {
 	}
 
 	_ = &Wrapper{
-		User: domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+		User: domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
@@ -167,7 +174,7 @@ func InStructField() {
 	}
 
 	_ = PointerWrapper{
-		User: &domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+		User: &domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
@@ -175,7 +182,7 @@ func InStructField() {
 	}
 
 	_ = &PointerWrapper{
-		User: &domain.User{ // want "direct construction of struct User is prohibited, use constructor function"
+		User: &domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
