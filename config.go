@@ -19,10 +19,11 @@ const (
 type MutationScope string
 
 const (
-	MutationScopeAny         MutationScope = "any"
-	MutationScopeReceiver    MutationScope = "receiver"
-	MutationScopeSamePackage MutationScope = "same-package"
-	MutationScopeNever       MutationScope = "never"
+	MutationScopeAny              MutationScope = "any"
+	MutationScopeInTargetPackages MutationScope = "in-target-packages"
+	MutationScopeReceiver         MutationScope = "receiver"
+	MutationScopeSamePackage      MutationScope = "same-package"
+	MutationScopeNever            MutationScope = "never"
 )
 
 type Config struct {
@@ -91,10 +92,10 @@ func validateInitScope(scope InitScope) error {
 
 func validateMutationScope(scope MutationScope) error {
 	switch scope {
-	case MutationScopeAny, MutationScopeReceiver, MutationScopeSamePackage, MutationScopeNever:
+	case MutationScopeAny, MutationScopeInTargetPackages, MutationScopeReceiver, MutationScopeSamePackage, MutationScopeNever:
 		return nil
 	default:
-		return fmt.Errorf("invalid mutation-scope: %s (must be 'any', 'receiver', 'same-package', or 'never')", scope)
+		return fmt.Errorf("invalid mutation-scope: %s (must be 'any', 'in-target-packages', 'receiver', 'same-package', or 'never')", scope)
 	}
 }
 

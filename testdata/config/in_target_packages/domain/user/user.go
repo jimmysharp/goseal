@@ -27,7 +27,7 @@ func NewUser(id int, name string, age int) (*User, error) {
 	}, nil
 }
 
-// SHOULD NOT REPORT: Assignment in receiver is allowed (mutation-scope: receiver)
+// SHOULD NOT REPORT: Assignment in target packages is allowed (mutation-scope: in-target-packages)
 func (u *User) UpdateName(name string) error {
 	if name == "" {
 		return fmt.Errorf("name must not be empty")

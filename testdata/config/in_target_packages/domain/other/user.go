@@ -24,3 +24,12 @@ func NewUser(id int, name string, age int) (*user.User, error) {
 		Age:  age,
 	}, nil
 }
+
+// SHOULD NOT REPORT: Non-receiver mutation in target packages is allowed (mutation-scope: in-target-packages)
+func Rename(u *user.User, name string) error {
+	if name == "" {
+		return fmt.Errorf("name must not be empty")
+	}
+	u.Name = name
+	return nil
+}

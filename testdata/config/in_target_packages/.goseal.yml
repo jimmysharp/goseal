@@ -3,6 +3,6 @@ target-packages:
 factory-names:
   - "^New.*"
 init-scope: in-target-packages
-mutation-scope: receiver
+mutation-scope: in-target-packages
 ignore-files:
   - "_test\\.go$"
