@@ -4,6 +4,7 @@ go 1.25.5
 
 require (
 	github.com/goccy/go-yaml v1.18.0
+	github.com/golangci/plugin-module-register v0.1.2
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/tools v0.40.0
 )
