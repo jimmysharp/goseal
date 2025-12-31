@@ -1,11 +1,12 @@
 package goseal
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
 
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 type InitScope string
@@ -33,6 +34,98 @@ type Config struct {
 	InitScope      InitScope        // Scope for struct initialization
 	MutationScope  MutationScope    // Scope for field mutation
 	IgnoreFiles    []*regexp.Regexp // Regex patterns for files to ignore
+}
+
+func (c *Config) UnmarshalJSON(data []byte) error {
+	type rawConfig struct {
+		TargetPackages []string `json:"target-packages"`
+		ExcludeStructs []string `json:"exclude-structs"`
+		FactoryNames   []string `json:"factory-names"`
+		InitScope      string   `json:"init-scope"`
+		MutationScope  string   `json:"mutation-scope"`
+		IgnoreFiles    []string `json:"ignore-files"`
+	}
+
+	var raw rawConfig
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	var targetPackages []*regexp.Regexp
+	var excludeStructs []*regexp.Regexp
+	var factoryNames []*regexp.Regexp
+	var ignoreFiles []*regexp.Regexp
+
+	// target-packages
+	if raw.TargetPackages != nil {
+		targetPackages = make([]*regexp.Regexp, len(raw.TargetPackages))
+		for i, pattern := range raw.TargetPackages {
+			re, err := regexp.Compile(pattern)
+			if err != nil {
+				return fmt.Errorf("invalid target-packages pattern '%s': %w", pattern, err)
+			}
+			targetPackages[i] = re
+		}
+	} else {
+		targetPackages = []*regexp.Regexp{}
+	}
+
+	// exclude-structs
+	if raw.ExcludeStructs != nil {
+		excludeStructs = make([]*regexp.Regexp, len(raw.ExcludeStructs))
+		for i, pattern := range raw.ExcludeStructs {
+			re, err := regexp.Compile(pattern)
+			if err != nil {
+				return fmt.Errorf("invalid exclude-structs pattern '%s': %w", pattern, err)
+			}
+			excludeStructs[i] = re
+		}
+	} else {
+		excludeStructs = []*regexp.Regexp{}
+	}
+
+	// factory-names
+	if raw.FactoryNames != nil {
+		factoryNames = make([]*regexp.Regexp, len(raw.FactoryNames))
+		for i, pattern := range raw.FactoryNames {
+			re, err := regexp.Compile(pattern)
+			if err != nil {
+				return fmt.Errorf("invalid factory-names pattern '%s': %w", pattern, err)
+			}
+			factoryNames[i] = re
+		}
+	} else {
+		factoryNames = []*regexp.Regexp{}
+	}
+
+	// ignore-files
+	if raw.IgnoreFiles != nil {
+		ignoreFiles = make([]*regexp.Regexp, len(raw.IgnoreFiles))
+		for i, pattern := range raw.IgnoreFiles {
+			re, err := regexp.Compile(pattern)
+			if err != nil {
+				return fmt.Errorf("invalid ignore-files pattern '%s': %w", pattern, err)
+			}
+			ignoreFiles[i] = re
+		}
+	} else {
+		ignoreFiles = []*regexp.Regexp{}
+	}
+
+	cfg, err := NewConfig(
+		targetPackages,
+		excludeStructs,
+		factoryNames,
+		InitScope(raw.InitScope),
+		MutationScope(raw.MutationScope),
+		ignoreFiles,
+	)
+	if err != nil {
+		return err
+	}
+
+	*c = *cfg
+	return nil
 }
 
 func NewConfig(
@@ -99,13 +192,26 @@ func validateMutationScope(scope MutationScope) error {
 	}
 }
 
-type yamlConfig struct {
-	TargetPackages []string `yaml:"target-packages"`
-	ExcludeStructs []string `yaml:"exclude-structs"`
-	FactoryNames   []string `yaml:"factory-names"`
-	InitScope      string   `yaml:"init-scope"`
-	MutationScope  string   `yaml:"mutation-scope"`
-	IgnoreFiles    []string `yaml:"ignore-files"`
+func ParseFromYAML(data []byte) (*Config, error) {
+	var cfg Config
+	if err := yaml.UnmarshalWithOptions(data, &cfg, yaml.UseJSONUnmarshaler()); err != nil {
+		return nil, fmt.Errorf("failed to parse config data: %w", err)
+	}
+
+	// Recover defaults for fully empty YAML
+	finalCfg, err := NewConfig(
+		cfg.TargetPackages,
+		cfg.ExcludeStructs,
+		cfg.FactoryNames,
+		cfg.InitScope,
+		cfg.MutationScope,
+		cfg.IgnoreFiles,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return finalCfg, nil
 }
 
 func ParseConfig(path string) (*Config, error) {
@@ -121,62 +227,5 @@ func ParseConfig(path string) (*Config, error) {
 		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
-	var yamlCfg yamlConfig
-	if err := yaml.Unmarshal(data, &yamlCfg); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %w", err)
-	}
-
-	return yamlCfg.compile()
-}
-
-func (y *yamlConfig) compile() (*Config, error) {
-	var targetPackages []*regexp.Regexp
-	var excludeStructs []*regexp.Regexp
-	var factoryNames []*regexp.Regexp
-	var ignoreFiles []*regexp.Regexp
-
-	// target-packages
-	for _, pattern := range y.TargetPackages {
-		re, err := regexp.Compile(pattern)
-		if err != nil {
-			return nil, fmt.Errorf("invalid target-packages pattern '%s': %w", pattern, err)
-		}
-		targetPackages = append(targetPackages, re)
-	}
-
-	// exclude-structs
-	for _, pattern := range y.ExcludeStructs {
-		re, err := regexp.Compile(pattern)
-		if err != nil {
-			return nil, fmt.Errorf("invalid exclude-structs pattern '%s': %w", pattern, err)
-		}
-		excludeStructs = append(excludeStructs, re)
-	}
-
-	// factory-names
-	for _, pattern := range y.FactoryNames {
-		re, err := regexp.Compile(pattern)
-		if err != nil {
-			return nil, fmt.Errorf("invalid factory-names pattern '%s': %w", pattern, err)
-		}
-		factoryNames = append(factoryNames, re)
-	}
-
-	// ignore-files
-	for _, pattern := range y.IgnoreFiles {
-		re, err := regexp.Compile(pattern)
-		if err != nil {
-			return nil, fmt.Errorf("invalid ignore-files pattern '%s': %w", pattern, err)
-		}
-		ignoreFiles = append(ignoreFiles, re)
-	}
-
-	return NewConfig(
-		targetPackages,
-		excludeStructs,
-		factoryNames,
-		InitScope(y.InitScope),
-		MutationScope(y.MutationScope),
-		ignoreFiles,
-	)
+	return ParseFromYAML(data)
 }
