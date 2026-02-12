@@ -1,6 +1,6 @@
 module github.com/jimmysharp/goseal
 
-go 1.25.5
+go 1.26.0
 
 require (
 	github.com/goccy/go-yaml v1.18.0
