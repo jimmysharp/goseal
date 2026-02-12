@@ -5,7 +5,18 @@ ARG GOLANGCI_LINT_VERSION=v2.9.0
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin ${GOLANGCI_LINT_VERSION}
 
-RUN go install golang.org/x/tools/gopls@v0.20.0
-RUN go install github.com/go-delve/delve/cmd/dlv@v1.25.2
-RUN go install github.com/josharian/impl@v1.4.0
-RUN go install github.com/fatih/gomodifytags@v1.17.0
+# renovate: datasource=go depName=golang.org/x/tools/gopls packageName=golang.org/x/tools/gopls
+ARG GOPLS_VERSION=v0.20.0
+RUN go install golang.org/x/tools/gopls@${GOPLS_VERSION}
+
+# renovate: datasource=go depName=github.com/go-delve/delve packageName=github.com/go-delve/delve
+ARG DLV_VERSION=v1.25.2
+RUN go install github.com/go-delve/delve/cmd/dlv@${DLV_VERSION}
+
+# renovate: datasource=go depName=github.com/josharian/impl packageName=github.com/josharian/impl
+ARG IMPL_VERSION=v1.4.0
+RUN go install github.com/josharian/impl@${IMPL_VERSION}
+
+# renovate: datasource=go depName=github.com/fatih/gomodifytags packageName=github.com/fatih/gomodifytags
+ARG GOMODIFYTAGS_VERSION=v1.17.0
+RUN go install github.com/fatih/gomodifytags@${GOMODIFYTAGS_VERSION}
