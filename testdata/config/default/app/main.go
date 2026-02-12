@@ -10,7 +10,7 @@ func WithFactoryFunction() {
 
 // SHOULD REPORT: Direct initialization without factory function
 func WithoutFactoryFunction() {
-	user := domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+	user := domain.User{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
@@ -20,7 +20,7 @@ func WithoutFactoryFunction() {
 
 // SHOULD REPORT: Direct initialization with pointer
 func WithoutFactoryFunctionByPointer() {
-	user := &domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+	user := &domain.User{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
@@ -39,5 +39,5 @@ func AssignmentInReceiver() {
 func DirectAssignment() {
 	user, _ := domain.NewUser(123, "Charlie", 35)
 
-	user.Name = "Dave" // want "direct assignment to field Name of struct User is prohibited outside allowed scope"
+	user.Name = "Dave" // want "direct assignment to field Name of sealed struct User is not allowed outside its receiver methods \\(mutation-scope: receiver\\)"
 }

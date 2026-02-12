@@ -154,8 +154,10 @@ func (c *goseal) checkCompositeLit(lit *ast.CompositeLit, pass *analysis.Pass, s
 	if !c.isInitAllowedByScope(pass.Pkg.Path(), pkgPath) {
 		pass.Reportf(
 			lit.Pos(),
-			"direct construction of struct %s is prohibited outside allowed scope",
+			"direct construction of sealed struct %s is not allowed %s (init-scope: %s)",
 			structName,
+			c.initScopeDescription(),
+			c.config.InitScope,
 		)
 		return
 	}
@@ -163,7 +165,7 @@ func (c *goseal) checkCompositeLit(lit *ast.CompositeLit, pass *analysis.Pass, s
 	if !c.isInAllowedFactory(stack) {
 		pass.Reportf(
 			lit.Pos(),
-			"direct construction of struct %s is prohibited, use allowed factory function",
+			"direct construction of sealed struct %s is not allowed outside factory functions (factory-names)",
 			structName,
 		)
 		return
@@ -218,9 +220,11 @@ func (c *goseal) checkAssignStmt(stmt *ast.AssignStmt, pass *analysis.Pass, stac
 			fieldName := selector.Sel.Name
 			pass.Reportf(
 				stmt.Pos(),
-				"direct assignment to field %s of struct %s is prohibited outside allowed scope",
+				"direct assignment to field %s of sealed struct %s is not allowed %s (mutation-scope: %s)",
 				fieldName,
 				structName,
+				c.mutationScopeDescription(),
+				c.config.MutationScope,
 			)
 		}
 	}
@@ -296,6 +300,32 @@ func (c *goseal) isInReceiverMethod(stack []ast.Node) bool {
 	}
 
 	return true
+}
+
+func (c *goseal) initScopeDescription() string {
+	switch c.config.InitScope {
+	case InitScopeSamePackage:
+		return "from outside its package"
+	case InitScopeInTargetPackages:
+		return "from outside target packages"
+	default:
+		return "in this scope"
+	}
+}
+
+func (c *goseal) mutationScopeDescription() string {
+	switch c.config.MutationScope {
+	case MutationScopeReceiver:
+		return "outside its receiver methods"
+	case MutationScopeSamePackage:
+		return "from outside its package"
+	case MutationScopeInTargetPackages:
+		return "from outside target packages"
+	case MutationScopeNever:
+		return "anywhere"
+	default:
+		return "in this scope"
+	}
 }
 
 func (c *goseal) getEnclosingFunc(stack []ast.Node) *ast.FuncDecl {

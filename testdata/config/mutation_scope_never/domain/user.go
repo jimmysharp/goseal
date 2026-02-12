@@ -31,11 +31,11 @@ func (u *User) UpdateName(name string) error {
 	if name == "" {
 		return fmt.Errorf("name must not be empty")
 	}
-	u.Name = name // want "direct assignment to field Name of struct User is prohibited outside allowed scope"
+	u.Name = name // want "direct assignment to field Name of sealed struct User is not allowed anywhere \\(mutation-scope: never\\)"
 	return nil
 }
 
 // SHOULD REPORT: Mutation is always prohibited (mutation-scope: never)
 func UpdateUserAge(u *User, age int) {
-	u.Age = age // want "direct assignment to field Age of struct User is prohibited outside allowed scope"
+	u.Age = age // want "direct assignment to field Age of sealed struct User is not allowed anywhere \\(mutation-scope: never\\)"
 }
