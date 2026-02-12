@@ -26,11 +26,11 @@ builds:
       - -w
 
 archives:
-  - format: tar.gz
+  - formats: [ 'tar.gz' ]
     name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{- if .Arm }}v{{ .Arm }}{{ end }}'
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [ 'zip' ]
 
 changelog:
   use: github-native
