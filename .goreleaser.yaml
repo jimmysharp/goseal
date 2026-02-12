@@ -32,5 +32,8 @@ archives:
       - goos: windows
         formats: [ 'zip' ]
 
+release:
+  draft: true
+
 changelog:
   use: github-native
