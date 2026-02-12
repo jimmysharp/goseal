@@ -18,8 +18,8 @@ func CreateUserDirect(name string, age int) *User {
 
 // SHOULD REPORT: Direct Assignment in non-receiver function (mutation-scope: receiver)
 func UpdateUserWithoutReceiver(u *User, name string, age int) *User {
-	u.Name = name // want "direct assignment to field Name of struct User is prohibited outside allowed scope"
-	u.Age = age   // want "direct assignment to field Age of struct User is prohibited outside allowed scope"
+	u.Name = name // want "direct assignment to field Name of sealed struct User is not allowed outside its receiver methods \\(mutation-scope: receiver\\)"
+	u.Age = age   // want "direct assignment to field Age of sealed struct User is not allowed outside its receiver methods \\(mutation-scope: receiver\\)"
 
 	return u
 }

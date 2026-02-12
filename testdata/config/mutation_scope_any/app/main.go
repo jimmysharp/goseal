@@ -10,7 +10,7 @@ func WithFactoryFunction() {
 
 // SHOULD REPORT: Direct initialization without factory (init-scope: same-package)
 func WithoutFactoryFunction() {
-	_ = domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+	_ = domain.User{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,

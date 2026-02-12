@@ -12,13 +12,13 @@ func WithFactoryFunction() {
 
 // SHOULD REPORT: Direct initialization outside target packages (init-scope: in-target-packages)
 func DirectInitFromApp() {
-	_ = user.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+	_ = user.User{ // want "direct construction of sealed struct User is not allowed from outside target packages \\(init-scope: in-target-packages\\)"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
 	}
 
-	_ = &user.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+	_ = &user.User{ // want "direct construction of sealed struct User is not allowed from outside target packages \\(init-scope: in-target-packages\\)"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
@@ -29,7 +29,7 @@ func DirectInitFromApp() {
 func DirectAssignment() {
 	u, _ := user.NewUser(123, "Charlie", 35)
 
-	u.ID = 456      // want "direct assignment to field ID of struct User is prohibited outside allowed scope"
-	u.Name = "Dave" // want "direct assignment to field Name of struct User is prohibited outside allowed scope"
-	u.Age = 40      // want "direct assignment to field Age of struct User is prohibited outside allowed scope"
+	u.ID = 456      // want "direct assignment to field ID of sealed struct User is not allowed from outside target packages \\(mutation-scope: in-target-packages\\)"
+	u.Name = "Dave" // want "direct assignment to field Name of sealed struct User is not allowed from outside target packages \\(mutation-scope: in-target-packages\\)"
+	u.Age = 40      // want "direct assignment to field Age of sealed struct User is not allowed from outside target packages \\(mutation-scope: in-target-packages\\)"
 }

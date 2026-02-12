@@ -13,13 +13,13 @@ func WithFactoryFunction() {
 
 // SHOULD REPORT: Initialization outside factory function
 func WithoutFactoryFunction() {
-	_ = domain.User{ // want "direct construction of struct User is prohibited, use allowed factory function"
+	_ = domain.User{ // want "direct construction of sealed struct User is not allowed outside factory functions \\(factory-names\\)"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
 	}
 
-	_ = &domain.User{ // want "direct construction of struct User is prohibited, use allowed factory function"
+	_ = &domain.User{ // want "direct construction of sealed struct User is not allowed outside factory functions \\(factory-names\\)"
 		ID:   456,
 		Name: "Charlie",
 		Age:  30,
@@ -41,7 +41,7 @@ type MyStruct struct {
 
 // SHOULD REPORT: target-packages is empty (all packages targeted), and not in factory function
 func InitLocalStruct() {
-	_ = MyStruct{ // want "direct construction of struct MyStruct is prohibited, use allowed factory function"
+	_ = MyStruct{ // want "direct construction of sealed struct MyStruct is not allowed outside factory functions \\(factory-names\\)"
 		Value: 100,
 	}
 }
@@ -57,7 +57,7 @@ func NewMyStruct(value int) *MyStruct {
 func DirectAssignment() {
 	user, _ := domain.NewUser(123, "Charlie", 35)
 
-	user.ID = 456      // want "direct assignment to field ID of struct User is prohibited outside allowed scope"
-	user.Name = "Dave" // want "direct assignment to field Name of struct User is prohibited outside allowed scope"
-	user.Age = 40      // want "direct assignment to field Age of struct User is prohibited outside allowed scope"
+	user.ID = 456      // want "direct assignment to field ID of sealed struct User is not allowed outside its receiver methods \\(mutation-scope: receiver\\)"
+	user.Name = "Dave" // want "direct assignment to field Name of sealed struct User is not allowed outside its receiver methods \\(mutation-scope: receiver\\)"
+	user.Age = 40      // want "direct assignment to field Age of sealed struct User is not allowed outside its receiver methods \\(mutation-scope: receiver\\)"
 }

@@ -10,19 +10,19 @@ func WithFactoryFunction() {
 
 // SHOULD REPORT: Direct initialization without factory function
 func WithoutFactoryFunction() {
-	_ = domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+	_ = domain.User{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
 	}
-	_ = domain.User{} // want "direct construction of struct User is prohibited outside allowed scope"
+	_ = domain.User{} // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 
-	_ = &domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+	_ = &domain.User{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 		ID:   123,
 		Name: "Bob",
 		Age:  25,
 	}
-	_ = &domain.User{} // want "direct construction of struct User is prohibited outside allowed scope"
+	_ = &domain.User{} // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 }
 
 // SHOULD NOT REPORT: Assignment through method
@@ -36,9 +36,9 @@ func AssignmentInReceiver() {
 func DirectAssignment() {
 	user, _ := domain.NewUser(123, "Charlie", 35)
 
-	user.ID = 456      // want "direct assignment to field ID of struct User is prohibited outside allowed scope"
-	user.Name = "Dave" // want "direct assignment to field Name of struct User is prohibited outside allowed scope"
-	user.Age = 40      // want "direct assignment to field Age of struct User is prohibited outside allowed scope"
+	user.ID = 456      // want "direct assignment to field ID of sealed struct User is not allowed outside its receiver methods \\(mutation-scope: receiver\\)"
+	user.Name = "Dave" // want "direct assignment to field Name of sealed struct User is not allowed outside its receiver methods \\(mutation-scope: receiver\\)"
+	user.Age = 40      // want "direct assignment to field Age of sealed struct User is not allowed outside its receiver methods \\(mutation-scope: receiver\\)"
 }
 
 type StructInSamePackage struct {
@@ -58,12 +58,12 @@ func InSamePackage() {
 // SHOULD REPORT: Direct initialization in slice
 func InSlice() {
 	_ = []domain.User{
-		{ // want "direct construction of struct User is prohibited outside allowed scope"
+		{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
-		{ // want "direct construction of struct User is prohibited outside allowed scope"
+		{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   2,
 			Name: "Bob",
 			Age:  25,
@@ -71,12 +71,12 @@ func InSlice() {
 	}
 
 	_ = []*domain.User{
-		{ // want "direct construction of struct User is prohibited outside allowed scope"
+		{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
-		{ // want "direct construction of struct User is prohibited outside allowed scope"
+		{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   2,
 			Name: "Bob",
 			Age:  25,
@@ -85,14 +85,14 @@ func InSlice() {
 
 	_ = [][]domain.User{
 		{
-			domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+			domain.User{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 				ID:   1,
 				Name: "Alice",
 				Age:  30,
 			},
 		},
 		{
-			{ // want "direct construction of struct User is prohibited outside allowed scope"
+			{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 				ID:   2,
 				Name: "Bob",
 				Age:  25,
@@ -104,12 +104,12 @@ func InSlice() {
 // SHOULD REPORT: Direct initialization in map
 func InMap() {
 	_ = map[int]domain.User{
-		1: { // want "direct construction of struct User is prohibited outside allowed scope"
+		1: { // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
-		2: { // want "direct construction of struct User is prohibited outside allowed scope"
+		2: { // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   2,
 			Name: "Bob",
 			Age:  25,
@@ -117,12 +117,12 @@ func InMap() {
 	}
 
 	_ = map[int]*domain.User{
-		1: { // want "direct construction of struct User is prohibited outside allowed scope"
+		1: { // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
-		2: { // want "direct construction of struct User is prohibited outside allowed scope"
+		2: { // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   2,
 			Name: "Bob",
 			Age:  25,
@@ -133,12 +133,12 @@ func InMap() {
 // SHOULD REPORT: Direct initialization in array
 func InArray() {
 	users := [2]domain.User{
-		{ // want "direct construction of struct User is prohibited outside allowed scope"
+		{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
 		},
-		{ // want "direct construction of struct User is prohibited outside allowed scope"
+		{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   2,
 			Name: "Bob",
 			Age:  25,
@@ -158,7 +158,7 @@ type PointerWrapper struct {
 // SHOULD REPORT: Direct initialization in struct field
 func InStructField() {
 	_ = Wrapper{
-		User: domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+		User: domain.User{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
@@ -166,7 +166,7 @@ func InStructField() {
 	}
 
 	_ = &Wrapper{
-		User: domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+		User: domain.User{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
@@ -174,7 +174,7 @@ func InStructField() {
 	}
 
 	_ = PointerWrapper{
-		User: &domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+		User: &domain.User{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
@@ -182,7 +182,7 @@ func InStructField() {
 	}
 
 	_ = &PointerWrapper{
-		User: &domain.User{ // want "direct construction of struct User is prohibited outside allowed scope"
+		User: &domain.User{ // want "direct construction of sealed struct User is not allowed from outside its package \\(init-scope: same-package\\)"
 			ID:   1,
 			Name: "Alice",
 			Age:  30,
