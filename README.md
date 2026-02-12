@@ -30,7 +30,7 @@ exclude-structs:
   - "DTO$"
 
 # List of regexps for functions considered as factory functions
-# If empty, all function names are allowed
+# If empty, struct initialization is allowed in any context
 # Default: []
 factory-names:
   - "^New.*"
@@ -58,10 +58,54 @@ ignore-files:
   - "mock_.*\\.go$"
 ```
 
+**Note:** Auto-generated files are automatically skipped.
+
 ## Usage
+
+### Standalone
 
 ```bash
 goseal ./...
+```
+
+### golangci-lint (custom plugin)
+
+goseal can also be used as a [golangci-lint custom plugin](https://golangci-lint.run/plugins/module-plugins/). When used as a plugin, `.goseal.yml` is not used. Instead, configure settings directly in `.golangci.yml`.
+
+Create `.custom-gcl.yml` to build a custom golangci-lint binary with goseal:
+
+```yaml
+version: v2.9.0
+plugins:
+  - module: 'github.com/jimmysharp/goseal'
+    import: 'github.com/jimmysharp/goseal/plugin'
+```
+
+Then configure goseal in `.golangci.yml` (the same settings as `.goseal.yml` are available under `settings`):
+
+```yaml
+version: "2"
+linters:
+  enable:
+    - goseal
+  settings:
+    custom:
+      goseal:
+        type: module
+        settings:
+          target-packages:
+            - "github\\.com/yourorg/domain/.*"
+          factory-names:
+            - "^New.*"
+          init-scope: same-package
+          mutation-scope: receiver
+```
+
+Build and run:
+
+```bash
+golangci-lint custom
+./custom-gcl run ./...
 ```
 
 ## Examples
