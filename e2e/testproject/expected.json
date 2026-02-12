@@ -1,0 +1,22 @@
+{
+  "Issues": [
+    {
+      "FromLinter": "goseal",
+      "Text": "direct construction of struct User is prohibited outside allowed scope",
+      "Pos": {
+        "Filename": "app/main.go",
+        "Line": 13,
+        "Column": 6
+      }
+    },
+    {
+      "FromLinter": "goseal",
+      "Text": "direct assignment to field Name of struct User is prohibited outside allowed scope",
+      "Pos": {
+        "Filename": "app/main.go",
+        "Line": 29,
+        "Column": 2
+      }
+    }
+  ]
+}

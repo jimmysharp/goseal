@@ -1,0 +1,5 @@
+version: v2.9.0
+plugins:
+  - module: 'github.com/jimmysharp/goseal'
+    import: 'github.com/jimmysharp/goseal/plugin'
+    path: '../..'
