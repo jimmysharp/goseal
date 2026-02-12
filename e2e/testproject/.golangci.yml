@@ -1,0 +1,16 @@
+version: "2"
+linters:
+  default: none
+  enable:
+    - goseal
+  settings:
+    custom:
+      goseal:
+        type: module
+        settings:
+          target-packages:
+            - "example\\.com/testproject/domain.*"
+          factory-names:
+            - "^New.*"
+          init-scope: same-package
+          mutation-scope: receiver
