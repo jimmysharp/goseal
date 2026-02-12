@@ -42,7 +42,7 @@ func TestGolangciLintPlugin(t *testing.T) {
 	testProjectDir := filepath.Join(e2eDir, "testproject")
 
 	// Build custom golangci-lint binary.
-	// golangci-lint custom reads .custom-gcl.yml from the working directory (e2e/).
+	// golangci-lint custom reads .custom-gcl.yml from the working directory (e2e/testproject/).
 	tmpDir := t.TempDir()
 	binaryPath := filepath.Join(tmpDir, "custom-gcl")
 	buildCmd := exec.Command(golangciLint, "custom", "--destination", tmpDir)
