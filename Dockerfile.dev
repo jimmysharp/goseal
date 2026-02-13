@@ -6,7 +6,7 @@ ARG GOLANGCI_LINT_VERSION=v2.9.0
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin ${GOLANGCI_LINT_VERSION}
 
 # renovate: datasource=go depName=golang.org/x/tools/gopls packageName=golang.org/x/tools/gopls
-ARG GOPLS_VERSION=v0.20.0
+ARG GOPLS_VERSION=v0.21.1
 RUN go install golang.org/x/tools/gopls@${GOPLS_VERSION}
 
 # renovate: datasource=go depName=github.com/go-delve/delve packageName=github.com/go-delve/delve
