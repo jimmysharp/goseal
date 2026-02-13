@@ -14,7 +14,7 @@ ARG DLV_VERSION=v1.25.2
 RUN go install github.com/go-delve/delve/cmd/dlv@${DLV_VERSION}
 
 # renovate: datasource=go depName=github.com/josharian/impl packageName=github.com/josharian/impl
-ARG IMPL_VERSION=v1.4.0
+ARG IMPL_VERSION=v1.5.0
 RUN go install github.com/josharian/impl@${IMPL_VERSION}
 
 # renovate: datasource=go depName=github.com/fatih/gomodifytags packageName=github.com/fatih/gomodifytags
