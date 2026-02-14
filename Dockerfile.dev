@@ -10,7 +10,7 @@ ARG GOPLS_VERSION=v0.21.1
 RUN go install golang.org/x/tools/gopls@${GOPLS_VERSION}
 
 # renovate: datasource=go depName=github.com/go-delve/delve packageName=github.com/go-delve/delve
-ARG DLV_VERSION=v1.25.2
+ARG DLV_VERSION=v1.26.0
 RUN go install github.com/go-delve/delve/cmd/dlv@${DLV_VERSION}
 
 # renovate: datasource=go depName=github.com/josharian/impl packageName=github.com/josharian/impl
