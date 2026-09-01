@@ -1,0 +1,6 @@
+[tools]
+go = "1.26.1"
+golangci-lint = "2.13.2"
+
+[settings]
+lockfile = true
