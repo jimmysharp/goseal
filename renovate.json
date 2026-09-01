@@ -24,13 +24,21 @@
   ],
   "packageRules": [
     {
-      "groupName": "go",
+      "description": "The go directive represents the oldest supported Go release",
       "matchPackageNames": [
-        "go",
+        "go"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "enabled": false
+    },
+    {
+      "groupName": "go toolchain",
+      "matchPackageNames": [
         "golang"
       ],
       "matchManagers": [
-        "gomod",
         "mise"
       ]
     }
