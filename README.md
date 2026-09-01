@@ -2,22 +2,6 @@
 
 `goseal` is a linter that checks direct initialization of Go structs and enforces creation through factory functions. It "seals" your structs, ensuring they can only be instantiated through approved factory functions. Use it to prevent invalid values from leaking into your objects, such as when applying the Value Object pattern.
 
-## Development
-
-Install [mise](https://mise.jdx.dev/) and set up the project tools:
-
-```bash
-mise trust
-mise install
-```
-
-This installs the locked versions of Go and golangci-lint defined in `mise.toml` and `mise.lock`. Once mise is activated in your shell, use the existing Make targets as usual:
-
-```bash
-make test
-make lint
-```
-
 ## Installation
 
 ```bash
@@ -251,6 +235,22 @@ factory-names:
   - "^New.*"
 init-scope: same-package
 mutation-scope: receiver
+```
+
+## Development
+
+Install [mise](https://mise.jdx.dev/) and set up the project tools:
+
+```bash
+mise trust
+mise install
+```
+
+This installs the locked versions of Go and golangci-lint defined in `mise.toml` and `mise.lock`. Once mise is activated in your shell, use the existing Make targets as usual:
+
+```bash
+make test
+make lint
 ```
 
 ## License
