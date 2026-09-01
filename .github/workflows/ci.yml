@@ -32,8 +32,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Keep these versions explicit so a new Go release cannot change CI
-        # without a corresponding repository change.
         include:
           - go-version: '1.26'
             codecov-flag: go-1-26
