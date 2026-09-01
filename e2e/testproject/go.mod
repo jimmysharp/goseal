@@ -1,5 +1,5 @@
 module example.com/testproject
 
-go 1.26.1
+go 1.26
 
 replace github.com/jimmysharp/goseal => ../..
