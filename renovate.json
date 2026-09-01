@@ -22,19 +22,6 @@
   "labels": [
     "dependencies"
   ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "Update _VERSION variables in Dockerfiles",
-      "managerFilePatterns": [
-        "/(^|/|\\.)Dockerfile$/",
-        "/(^|/)Dockerfile\\.[^/]*$/"
-      ],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s(?:ENV|ARG) .+?_VERSION=(?<currentValue>.+?)\\s"
-      ]
-    }
-  ],
   "packageRules": [
     {
       "groupName": "go",
@@ -44,7 +31,7 @@
       ],
       "matchManagers": [
         "gomod",
-        "dockerfile"
+        "mise"
       ]
     }
   ],
